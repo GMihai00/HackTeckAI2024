@@ -91,7 +91,7 @@ class ObjectTracker:
                 
                 if self.should_render:
                     # movement only
-                    self.image_render.load_image(img_threshold)
+                    # self.image_render.load_image(img_threshold)
                     # self.image_render.start_rendering()
                     
                     # this gets into a deadlock

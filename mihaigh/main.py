@@ -3,7 +3,9 @@ import time
 
 def main():
 
-    binTracker = ObjectTracker("/home/mgherghinescu/projects/HackTeck2024/Dataset/Videori 240520/240520/240520_055427_055527.mp4")
+    # binTracker = ObjectTracker("/home/mgherghinescu/projects/HackTeck2024/Dataset/Videori 240520/240520/240520_055427_055527.mp4")
+    
+    binTracker = ObjectTracker("/home/mgherghinescu/projects/HackTeck2024/Dataset/output_merged_video.mp4")
     
     binTracker.start_tracking(True);
     
