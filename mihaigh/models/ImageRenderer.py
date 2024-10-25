@@ -44,14 +44,25 @@ class ImageRender:
         cv2.destroyAllWindows()
 
     def stop_rendering(self):
+        # print("SEE WHAT IS UP")
+        # if self.is_running == False:
+        #     return
+        print("Stop rendering")
         self.shutting_down = True
-        with self.cond_var_render:
+        try:
             self.cond_var_render.notify_all()
+        except:
+            with self.cond_var_render:
+                self.cond_var_render.notify_all()
         
+        print("THREAD BUSTER")
         if self.thread_render and self.thread_render.is_alive():
             self.thread_render.join()
 
         self.is_running = False  # Update is_running here after thread has joined
+        print("DONE DONE ")
 
     def __del__(self):
+        print("STOPPING RENDERING")
         self.stop_rendering()
+        print("SOMETHING")

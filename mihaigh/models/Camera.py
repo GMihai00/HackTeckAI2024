@@ -11,6 +11,8 @@ class Camera:
         self.current_image = None
         self.shutting_down = False
         self.thread_read = None
+        self.mutex_camera = threading.Lock()
+        self.cond_var_camera = threading.Condition(self.mutex_camera)
         self.lock = threading.Lock()
         self.cond_var_read = threading.Condition(self.lock)
 
@@ -44,18 +46,32 @@ class Camera:
 
     def _read_frames(self):
         while not self.shutting_down and self.video_capture and self.video_capture.isOpened():
-            with self.lock:
-                if self.current_image is not None:
-                    self.cond_var_read.wait()
+            with self.cond_var_camera:
+                print("LOCK1")
+                if self.current_image is not None and self.video_capture and self.video_capture.isOpened():
+                    print("IMAGE ALREADY EXISTING WAITING FOR READ!")
+                    try:
+                        self.cond_var_read.notify()
+                    except:
+                        with self.cond_var_read:
+                            self.cond_var_read.notify()
+                    self.cond_var_camera.wait()
 
                 ret, frame = self.video_capture.read()
                 if ret:
-                    frame = cv2.resize(frame, (854, 480))
+                    frame = cv2.resize(frame, (640, 640))
                     self.current_image = frame
-                    self.cond_var_read.notify()
+                    with self.cond_var_read:
+                        self.cond_var_read.notify()
                 else:
                     print("Failed to read image.")
+                    try:
+                        self.cond_var_read.notify()
+                    except:
+                        with self.cond_var_read:
+                            self.cond_var_read.notify()
                     break
+        self.shutting_down = True
 
     def is_running(self) -> bool:
         with self.lock:
@@ -65,11 +81,31 @@ class Camera:
         return self.id_
 
     def get_image(self) -> Optional[cv2.Mat]:
-        with self.lock:
+        with self.cond_var_read:
+            print("LOCK2")
             if self.current_image is None:
-                self.cond_var_read.notify()
+                print("Current image is none")
+                try:
+                    self.cond_var_camera.notify()
+                except:
+                    with self.cond_var_camera:
+                        self.cond_var_camera.notify()
+                if self.shutting_down == False:
+                    self.cond_var_read.wait()
+            
+            if self.current_image is None:
+                print("REACHED THE END OF THE VIDEO!!!")
                 return None
+                
+            print("Getting image")
             image_copy = self.current_image.copy()
             self.current_image = None
-            self.cond_var_read.notify()
+            try:
+                self.cond_var_camera.notify()
+            except:
+                with self.cond_var_camera:
+                    self.cond_var_camera.notify()
             return image_copy
+            
+    def __del__(self):
+        print("DELETING CAMERA")

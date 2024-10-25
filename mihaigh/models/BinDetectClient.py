@@ -70,8 +70,12 @@ class BinDetectClient:
 
     def stop_detecting(self):
         self.shutting_down = True
-        with self.cond_var_detect:
+        
+        try:
             self.cond_var_detect.notify_all()
+        except:
+            with self.cond_var_detect:
+                self.cond_var_detect.notify_all()
         if self.thread_detect and self.thread_detect.is_alive():
             self.thread_detect.join()
 
@@ -89,5 +93,7 @@ class BinDetectClient:
         return result
 
     def __del__(self):
+        print("STOPPING BIN CLIENT")
         self.stop_detecting()
         self.executor.shutdown()
+        print("DONE STOPPING BIN CLIENT")

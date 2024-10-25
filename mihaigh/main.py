@@ -16,6 +16,8 @@ def main():
         
     binTracker.stop_tracking();
     
+    print("EXITING MAIN")
+    
 
 if __name__ == "__main__":
     main()
