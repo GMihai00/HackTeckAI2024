@@ -44,9 +44,6 @@ class ImageRender:
         cv2.destroyAllWindows()
 
     def stop_rendering(self):
-        # print("SEE WHAT IS UP")
-        # if self.is_running == False:
-        #     return
         print("Stop rendering")
         self.shutting_down = True
         try:

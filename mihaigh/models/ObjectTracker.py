@@ -90,13 +90,9 @@ class ObjectTracker:
                 
                 
                 if self.should_render:
-                    # normal view
-                    # cv2.imshow("FRAME", cpy)
-                    # cv2.waitKey(1)
-                    
                     # movement only
-                    # cv2.imshow("FRAME", img_threshold)
-                    # cv2.waitKey(1)
+                    self.image_render.load_image(img_threshold)
+                    # self.image_render.start_rendering()
                     
                     # this gets into a deadlock
                     self.image_render.load_image(cpy)
