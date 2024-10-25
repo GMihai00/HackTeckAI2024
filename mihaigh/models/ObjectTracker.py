@@ -67,6 +67,7 @@ class ObjectTracker:
                 img_threshold = self.image_processor.get_processed_merged_image(
                     self.first_image_frame, self.second_image_frame)
                 
+                    
                 detected_moving_objs = self.image_processor.get_moving_objects_from_img(img_threshold)
                 
                 if not self.moving_objects:
@@ -79,7 +80,12 @@ class ObjectTracker:
                 self.draw_results_on_image(cpy)
                 
                 if self.should_render:
-                    cv2.imshow("FRAME", cpy)
+                    # normal view
+                    # cv2.imshow("FRAME", cpy)
+                    # cv2.waitKey(1)
+                    
+                    # movement only
+                    cv2.imshow("FRAME", img_threshold)
                     cv2.waitKey(1)
                     
                     # this gets into a deadlock
