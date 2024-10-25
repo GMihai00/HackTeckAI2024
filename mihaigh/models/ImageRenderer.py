@@ -1,0 +1,57 @@
+import cv2
+import threading
+import queue
+
+class ImageRender:
+    def __init__(self):
+        self.image_queue = queue.Queue()
+        self.is_running = False
+        self.shutting_down = False
+        self.cond_var_render = threading.Condition()
+        self.thread_render = None
+
+    def load_image(self, image):
+        with self.cond_var_render:
+            self.image_queue.put(image)
+            self.cond_var_render.notify()
+
+    def start_rendering(self):
+        if self.is_running:
+            return False
+
+        self.is_running = True
+        self.shutting_down = False
+        self.thread_render = threading.Thread(target=self.render_thread)
+        self.thread_render.start()
+        return True
+
+    def render_thread(self):
+        while not self.shutting_down:
+            with self.cond_var_render:
+                while self.image_queue.empty() and not self.shutting_down:
+                    self.cond_var_render.wait()
+
+                if self.shutting_down:
+                    break
+
+                # Get the next image from the queue
+                image = self.image_queue.get()
+                cv2.imshow("FRAME", image)
+                
+                # Wait for a short time to display the image
+                cv2.waitKey(1)
+
+        cv2.destroyAllWindows()
+
+    def stop_rendering(self):
+        self.shutting_down = True
+        with self.cond_var_render:
+            self.cond_var_render.notify_all()
+        
+        if self.thread_render and self.thread_render.is_alive():
+            self.thread_render.join()
+
+        self.is_running = False  # Update is_running here after thread has joined
+
+    def __del__(self):
+        self.stop_rendering()
