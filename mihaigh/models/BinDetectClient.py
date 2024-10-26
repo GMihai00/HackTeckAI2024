@@ -2,21 +2,38 @@ import cv2
 import threading
 import queue
 from concurrent.futures import Future, ThreadPoolExecutor
-# import tensorflow as tf  # placeholder for tensorflowClient implementation
+
+from ultralytics import YOLO
 
 # dummy
-class TensorFlowClient:
+class YOLOClient:
+
+    def __init__(self):
+        self.model = YOLO('/home/mgherghinescu/projects/HackTeck2024/mihaigh/models/binmodel.pt')
+        pass
+        
     def connect(self, host, port):
         # Placeholder for connecting to TensorFlow server
         return True
 
     def get_bin_count_inside_image(self, image):
-        # Placeholder for TensorFlow model to count bins in the image always return 1 bin
-        return 1
+
+        results = self.model(image)
+
+        detections = []
+        for r in results:
+            for box in r.boxes:
+                confidence = float(box.conf[0].cpu().numpy())
+                if confidence >= 0.7:
+                    print(f"CONFIDENCE SCORE: {confidence}")
+                    detections.append([confidence])
+        
+        print(f"Detected objects in frame sub-image: {len(detections)}")
+        return len(detections)
 
 class BinDetectClient:
     def __init__(self):
-        self.tensorflow_client = TensorFlowClient()
+        self.tensorflow_client = YOLOClient()
         self.task_queue = queue.Queue()
         self.is_running = False
         self.shutting_down = False

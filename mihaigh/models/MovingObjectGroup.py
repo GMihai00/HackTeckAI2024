@@ -8,6 +8,7 @@ class MovingObjectGroup:
     MAX_FRAMES_WITHOUT_A_MATCH = 120
     
     instance_count = 0
+    bin_count = 1
     
     def __init__(self):
         self.center_positions = []
@@ -22,10 +23,12 @@ class MovingObjectGroup:
         
         MovingObjectGroup.instance_count += 1
         self.id = MovingObjectGroup.instance_count
+        self.bin_id = 0
     
     
     def get_id(self):
-        return self.id
+        # self.bin_id
+        return self.bin_id
         
     def predict_next_position(self):
         n = len(self.center_positions)
@@ -127,10 +130,15 @@ class MovingObjectGroup:
 
     def update_bin_state(self, nr_bins: int):
         with self.mutex_group:
+            if self.bin_id == 0 and nr_bins > 0:
+                self.bin_id = MovingObjectGroup.bin_count
+                MovingObjectGroup.bin_count = MovingObjectGroup.bin_count + 1
+                
             if nr_bins == 0:
                 self.nr_frames_without_being_bin += 1
             else:
                 self.nr_frames_without_being_bin = 0
+                
             self.nr_bins = nr_bins
 
     def get_nr_bins(self) -> int:
