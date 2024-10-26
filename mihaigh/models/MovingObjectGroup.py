@@ -6,7 +6,9 @@ import threading
 class MovingObjectGroup:
     MAX_OBJECTS_STORED = 10
     MAX_FRAMES_WITHOUT_A_MATCH = 5
-
+    
+    instance_count = 0
+    
     def __init__(self):
         self.center_positions = []
         self.future_position = (0, 0)
@@ -17,7 +19,14 @@ class MovingObjectGroup:
         self.nr_frames_without_being_bin = 0
         self.nr_bins = 0
         self.mutex_group = threading.Lock()
-
+        
+        MovingObjectGroup.instance_count += 1
+        self.id = MovingObjectGroup.instance_count
+    
+    
+    def get_id(self):
+        return self.id
+        
     def predict_next_position(self):
         n = len(self.center_positions)
         if n == 0:

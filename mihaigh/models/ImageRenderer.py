@@ -41,6 +41,9 @@ class ImageRender:
                 cv2.imshow("FRAME_" + str(self.id), image)
                 
                 # Wait for a short time to display the image
+                # This is how I slow down overall video
+                # for debug
+                # cv2.waitKey(20)
                 cv2.waitKey(1)
 
         cv2.destroyAllWindows()

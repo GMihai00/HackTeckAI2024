@@ -210,7 +210,7 @@ class ObjectTracker:
                 center_position = moving_obj_group.get_last_center_position()
                 if center_position:
                     cv2.putText(
-                        img, str(cnt), 
+                        img, str(cnt) + "_" + str(moving_obj_group.get_id()), 
                         (int(center_position[0]), int(center_position[1])), 
                         font_face, font_scale, (0, 255, 0), font_thickness  # SCALAR_GREEN in BGR
                     )
