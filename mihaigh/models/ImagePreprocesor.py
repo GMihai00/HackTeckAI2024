@@ -12,11 +12,11 @@ class ImageProcessor:
     @staticmethod
     def is_minimum_obj_size(obj):
         # HARDCODED VALUES TO TWEEK
-        return (obj and obj.get_area() > 400 and
-                0.2 < obj.get_aspect_ratio() < 4.0 and
-                obj.get_width() > 30 and obj.get_height() > 30 and
-                obj.get_diagonal_size() > 60.0 and
-                obj.get_contour_area_ratio() > 0.50)
+        return (obj and obj.get_area() > 2000 and
+            0.2 < obj.get_aspect_ratio() < 4.0 and
+            obj.get_width() > 100 and obj.get_height() > 100 and
+            obj.get_diagonal_size() > 150.0 and
+            obj.get_contour_area_ratio() > 0.70)
 
     def get_moving_objects_from_img(self, img):
         convex_hulls = self.get_img_convex_hulls(img)
