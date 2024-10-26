@@ -24,7 +24,7 @@ class YOLOClient:
         for r in results:
             for box in r.boxes:
                 confidence = float(box.conf[0].cpu().numpy())
-                if confidence >= 0.85:
+                if confidence >= 0.71:
                     print(f"CONFIDENCE SCORE: {confidence}")
                     detections.append([confidence])
         
