@@ -6,7 +6,7 @@ from models.MovingObjectGroup import MovingObjectGroup
 
 def main():
     # short edge cases
-    # binTracker = ObjectTracker("/home/mgherghinescu/projects/HackTeck2024/Dataset/Videori 240520/240520/240520_064129_064229.mp4")
+    #binTracker = ObjectTracker("/home/mgherghinescu/projects/HackTeck2024/Dataset/Videori 240520/240520/240520_064129_064229.mp4")
     # 15 min long in 46 sec
     binTracker = ObjectTracker("/home/mgherghinescu/projects/HackTeck2024/Dataset/output_merged_video.mp4")
     
@@ -30,7 +30,7 @@ def main():
     elapsed_time = end_time - start_time
     print(f"\nProgram stopped by user. Time elapsed: {elapsed_time:.2f} seconds")
     
-    print(f"TOTAL NUMBER OF BINS DETECTED: {MovingObjectGroup.BIN_COUNT}")
+    print(f"TOTAL NUMBER OF BINS DETECTED: {MovingObjectGroup.BIN_COUNT - 1}")
     print("EXITING MAIN")
     
 
