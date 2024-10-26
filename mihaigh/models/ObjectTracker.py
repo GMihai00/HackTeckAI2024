@@ -18,7 +18,6 @@ from .MovingObject import *
 
 class ObjectTracker:
     def __init__(self, camera_source, observer=None):
-        self.attached_observer = observer
         self.camera = Camera(path_video = camera_source)  # Can be camera ID or video path
         self.image_processor = ImageProcessor()
         self.image_render = ImageRender()
@@ -26,8 +25,6 @@ class ObjectTracker:
         self.image_queue = Queue()
         self.first_image_frame = None
         self.second_image_frame = None
-        self.car_count_left = 0
-        self.car_count_right = 0
         self.should_render = False
         self.task_id_to_obj_group = {}
         self.task_id = 0
@@ -150,8 +147,6 @@ class ObjectTracker:
         self.image_queue.queue.clear()
         self.first_image_frame = None
         self.second_image_frame = None
-        self.car_count_left = 0
-        self.car_count_right = 0
         
         # print("STOPPPPP")
         try:
@@ -192,11 +187,6 @@ class ObjectTracker:
         self.task_id_to_obj_group.clear()
         self.task_id = 0
 
-        if self.attached_observer and (self.car_count_left or self.car_count_right):
-            self.attached_observer.notify()
-
-        self.draw_obj_count_on_image(img)
-
     def draw_obj_info_on_image(self, img, moving_objects):
         cnt = 0
         for moving_obj_group in moving_objects:
@@ -226,15 +216,6 @@ class ObjectTracker:
                     )
             cnt += 1
 
-    def draw_obj_count_on_image(self, img):
-        font_face = cv2.FONT_HERSHEY_SIMPLEX
-        font_scale = (img.shape[0] * img.shape[1]) / 450000.0
-        font_thickness = int(round(font_scale * 2.5))
-        
-        cv2.putText(img, f"Total detected vehicles: {self.car_count_right}", 
-                    (self.crossing_line_right[0][0] + 10, 25), font_face, font_scale, (0, 0, 255), font_thickness)
-        cv2.putText(img, f"Total detected vehicles: {self.car_count_left}", 
-                    (self.crossing_line_left[0][0] + 10, 25), font_face, font_scale, (0, 255, 255), font_thickness)
 
     # Other supporting methods like add_new_moving_object, match_found_obj_to_existing_ones, etc., would go here.
     def add_new_moving_object(self, current_frame_moving_obj):
