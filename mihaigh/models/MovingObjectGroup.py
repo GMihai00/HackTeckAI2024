@@ -4,8 +4,8 @@ import numpy as np
 import threading
 
 class MovingObjectGroup:
-    MAX_OBJECTS_STORED = 10
-    MAX_FRAMES_WITHOUT_A_MATCH = 5
+    MAX_OBJECTS_STORED = 250
+    MAX_FRAMES_WITHOUT_A_MATCH = 120
     
     instance_count = 0
     

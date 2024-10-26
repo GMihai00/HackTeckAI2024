@@ -49,7 +49,28 @@ class ObjectTracker:
 
             self.first_image_frame = self.image_queue.get()
             self.setup_lines()
-
+    
+    def object_blocking_camera(self):
+        if self.first_image_frame is not None:
+            # Calculate the absolute difference between the two frames
+            diff = cv2.absdiff(self.first_image_frame, self.second_image_frame)
+            
+            # Convert the difference image to grayscale
+            gray_diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+            
+            # Threshold the grayscale image to binarize it
+            _, thresh = cv2.threshold(gray_diff, 30, 255, cv2.THRESH_BINARY)
+        
+            # Calculate the percentage of non-zero pixels
+            non_zero_count = cv2.countNonZero(thresh)
+            total_pixels = thresh.size
+            similarity_percentage = (non_zero_count / total_pixels) * 100
+            if similarity_percentage > 90:
+                print("Skipping frame due to high similarity.")
+                return True
+        
+        return False
+    
     def process_images(self):
         self.wait_for_first_frame_appearance()
         while self.camera.is_running() or not self.image_queue.empty():
@@ -63,8 +84,13 @@ class ObjectTracker:
                 
                 # print("Fetching image")
                 self.second_image_frame = self.image_queue.get()
-                # print("Processing image")
 
+                # skip frames that have 90%  pixels the same
+                # TO DO NOT WORKING
+                # if self.object_blocking_camera():
+                #     cv2.waitKey(0)
+                #     continue
+                
                 img_threshold = self.image_processor.get_processed_merged_image(
                     self.first_image_frame, self.second_image_frame)
                 
@@ -270,7 +296,7 @@ class ObjectTracker:
         for moving_obj in current_frame_moving_objs:
             closest_group, least_distance = self.get_closest_moving_object(self.moving_objects, moving_obj)
 
-            if closest_group and least_distance < moving_obj.get_diagonal_size() * 0.5:
+            if closest_group:
                 closest_group.add_moving_object(moving_obj)
                 closest_group.update_state(True)
                 
