@@ -11,6 +11,9 @@ class MovingObject:
         center_y = (self.bounding_rect[1] + self.bounding_rect[1] + self.bounding_rect[3]) // 2
         return (center_x, center_y)
 
+    def get_bbox(self):
+        return self.bounding_rect
+        
     def get_diagonal_size(self):
         width = self.bounding_rect[2]
         height = self.bounding_rect[3]
