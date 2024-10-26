@@ -18,7 +18,7 @@ class YOLOClient:
 
     def get_bin_count_inside_image(self, image):
 
-        results = self.model(image)
+        results = self.model(image, verbose=False)
 
         detections = []
         for r in results:
@@ -28,7 +28,6 @@ class YOLOClient:
                     print(f"CONFIDENCE SCORE: {confidence}")
                     detections.append([confidence])
         
-        print(f"Detected objects in frame sub-image: {len(detections)}")
         return len(detections)
 
 class BinDetectClient:
@@ -50,7 +49,7 @@ class BinDetectClient:
         with self.cond_var_detect:
             self.task_queue.put((task_id, image))
             self.cond_var_detect.notify()
-
+    
     def get_bins_present_in_image(self, image):
         # Returns a future representing the result of bin counting in the image
         return self.executor.submit(self.tensorflow_client.get_bin_count_inside_image, image)

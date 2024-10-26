@@ -6,7 +6,7 @@ import threading
 class MovingObjectGroup:
     MAX_OBJECTS_STORED = 300
     MAX_FRAMES_WITHOUT_A_MATCH = 100
-    MINIMUM_CONSECUTIVE_OBJECT_MATCHES = 10
+    MINIMUM_CONSECUTIVE_OBJECT_MATCHES = 3
     
     BIN_COUNT = 1
     
@@ -22,7 +22,6 @@ class MovingObjectGroup:
         self.mutex_group = threading.Lock()
         self.nr_consecutive_matches = 0
         self.bin_id = 0
-    
     
     def get_id(self):
         # self.bin_id
@@ -59,12 +58,9 @@ class MovingObjectGroup:
     def update_state(self, found: bool):
         with self.mutex_group:
             if found:
-                self.nr_consecutive_matches+=1
-                if self.nr_consecutive_matches >= MovingObjectGroup.MINIMUM_CONSECUTIVE_OBJECT_MATCHES:
-                    self.obj_found_in_frame = True
+                self.obj_found_in_frame = True
                 self.nr_frames_without_match = 0
             else:
-                self.nr_consecutive_matches = 0
                 self.nr_frames_without_match += 1
                 self.obj_found_in_frame = False
 
@@ -131,14 +127,15 @@ class MovingObjectGroup:
 
     def update_bin_state(self, nr_bins: int):
         with self.mutex_group:
-            if self.bin_id == 0 and nr_bins > 0:
-                self.bin_id = MovingObjectGroup.BIN_COUNT
-                MovingObjectGroup.BIN_COUNT = MovingObjectGroup.BIN_COUNT + 1
-                
             if nr_bins == 0:
+                self.nr_consecutive_matches = 0
                 self.nr_frames_without_being_bin += 1
             else:
+                self.nr_consecutive_matches+=1
                 self.nr_frames_without_being_bin = 0
+                if self.nr_consecutive_matches >= MovingObjectGroup.MINIMUM_CONSECUTIVE_OBJECT_MATCHES and self.bin_id == 0:
+                    self.bin_id = MovingObjectGroup.BIN_COUNT
+                    MovingObjectGroup.BIN_COUNT = MovingObjectGroup.BIN_COUNT + 1
             
             self.nr_bins = nr_bins
 

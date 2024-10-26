@@ -52,7 +52,7 @@ class ObjectTracker:
     
     def object_blocking_camera(self, color_percentage):
         if color_percentage > 90:
-            print("SKIPPING frame due to high similarity.")
+            # print("SKIPPING frame due to high similarity.")
             return True
         
         return False
@@ -211,7 +211,7 @@ class ObjectTracker:
             moving_obj = moving_obj_group.get_last_state()
             
             if moving_obj:
-                if moving_obj_group.get_nr_bins() != 0:
+                if moving_obj_group.bin_id != 0:
                     color = (0, 0, 255)  # SCALAR_RED in BGR
                 else:
                     color = (0, 255, 255)  # SCALAR_YELLOW in BGR
@@ -292,7 +292,7 @@ class ObjectTracker:
                 closest_group.add_moving_object(moving_obj)
                 closest_group.update_state(True)
                 
-                if closest_group.get_nr_bins() == 0:
+                if  closest_group.bin_id == 0:
                     self.detect_bins_in_object_group(closest_group)
             else:
                 self.add_new_moving_object(moving_obj)
