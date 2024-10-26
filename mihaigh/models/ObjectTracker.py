@@ -213,25 +213,25 @@ class ObjectTracker:
             if moving_obj:
                 if moving_obj_group.bin_id != 0:
                     color = (0, 0, 255)  # SCALAR_RED in BGR
+                    # Draw bounding rectangle
+                    cv2.rectangle(img, moving_obj.get_bounding_rect(), color, 2)
+                    
+                    # Set font parameters
+                    font_face = cv2.FONT_HERSHEY_SIMPLEX
+                    font_scale = (img.shape[0] * img.shape[1]) / 300000.0
+                    font_thickness = int(round(font_scale * 1.0))
+                    
+                    # Get center position for text placement
+                    center_position = moving_obj_group.get_last_center_position()
+                    if center_position:
+                        cv2.putText(
+                            img, str(cnt) + "_" + str(moving_obj_group.get_id()), 
+                            (int(center_position[0]), int(center_position[1])), 
+                            font_face, font_scale, (0, 255, 0), font_thickness  # SCALAR_GREEN in BGR
+                        )
                 else:
                     color = (0, 255, 255)  # SCALAR_YELLOW in BGR
     
-                # Draw bounding rectangle
-                cv2.rectangle(img, moving_obj.get_bounding_rect(), color, 2)
-                
-                # Set font parameters
-                font_face = cv2.FONT_HERSHEY_SIMPLEX
-                font_scale = (img.shape[0] * img.shape[1]) / 300000.0
-                font_thickness = int(round(font_scale * 1.0))
-                
-                # Get center position for text placement
-                center_position = moving_obj_group.get_last_center_position()
-                if center_position:
-                    cv2.putText(
-                        img, str(cnt) + "_" + str(moving_obj_group.get_id()), 
-                        (int(center_position[0]), int(center_position[1])), 
-                        font_face, font_scale, (0, 255, 0), font_thickness  # SCALAR_GREEN in BGR
-                    )
             cnt += 1
 
 

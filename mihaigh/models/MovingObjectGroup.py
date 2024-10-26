@@ -5,7 +5,7 @@ import threading
 
 class MovingObjectGroup:
     MAX_OBJECTS_STORED = 300
-    MAX_FRAMES_WITHOUT_A_MATCH = 80
+    MAX_FRAMES_WITHOUT_A_MATCH = 90
     MINIMUM_CONSECUTIVE_OBJECT_MATCHES = 4
     
     BIN_COUNT = 1
