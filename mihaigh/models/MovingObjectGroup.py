@@ -14,8 +14,8 @@ class MovingObjectGroup:
         self.sum_center_pos = (0, 0)
         self.obj_found_in_frame = False
         self.nr_frames_without_match = 0
-        self.nr_frames_without_being_car = 0
-        self.nr_cars = 0
+        self.nr_frames_without_being_bin = 0
+        self.nr_bins = 0
         self.mutex_group = threading.Lock()
 
     def predict_next_position(self):
@@ -62,7 +62,7 @@ class MovingObjectGroup:
     def still_being_tracked(self) -> bool:
         with self.mutex_group:
             return (self.nr_frames_without_match < self.MAX_FRAMES_WITHOUT_A_MATCH and
-                    self.nr_frames_without_being_car < self.MAX_FRAMES_WITHOUT_A_MATCH)
+                    self.nr_frames_without_being_bin < self.MAX_FRAMES_WITHOUT_A_MATCH)
 
     def get_center_position(self, index: int) -> Optional[Tuple[int, int]]:
         with self.mutex_group:
@@ -116,14 +116,14 @@ class MovingObjectGroup:
                 # If there's an error, return the original bounding rectangle of the last object state
                 return img[self.moving_object_states[-1].get_bounding_rect()]
 
-    def update_car_state(self, nr_cars: int):
+    def update_bin_state(self, nr_bins: int):
         with self.mutex_group:
-            if nr_cars == 0:
-                self.nr_frames_without_being_car += 1
+            if nr_bins == 0:
+                self.nr_frames_without_being_bin += 1
             else:
-                self.nr_frames_without_being_car = 0
-            self.nr_cars = nr_cars
+                self.nr_frames_without_being_bin = 0
+            self.nr_bins = nr_bins
 
-    def get_nr_cars(self) -> int:
+    def get_nr_bins(self) -> int:
         with self.mutex_group:
-            return self.nr_cars
+            return self.nr_bins

@@ -179,10 +179,10 @@ class ObjectTracker:
     def draw_results_on_image(self, img):
         self.draw_obj_info_on_image(img, self.moving_objects)
         
-        car_count_map = self.bin_detector.wait_for_finish()
-        for task_id, nr_cars in car_count_map.items():
+        bin_count_map = self.bin_detector.wait_for_finish()
+        for task_id, nr_bins in bin_count_map.items():
             if task_id in self.task_id_to_obj_group:
-                self.task_id_to_obj_group[task_id].update_car_state(nr_cars)
+                self.task_id_to_obj_group[task_id].update_bin_state(nr_bins)
 
         self.task_id_to_obj_group.clear()
         self.task_id = 0
@@ -193,7 +193,7 @@ class ObjectTracker:
             moving_obj = moving_obj_group.get_last_state()
             
             if moving_obj:
-                if moving_obj_group.get_nr_cars() != 0:
+                if moving_obj_group.get_nr_bins() != 0:
                     color = (0, 0, 255)  # SCALAR_RED in BGR
                 else:
                     color = (0, 255, 255)  # SCALAR_YELLOW in BGR
@@ -239,7 +239,7 @@ class ObjectTracker:
         # Associate the current task ID with this object group for tracking
         self.task_id_to_obj_group[self.task_id] = obj_group
     
-        # Load the image as a detection task in the car detector and increment task ID
+        # Load the image as a detection task in the bin detector and increment task ID
         self.bin_detector.load_task(self.task_id, object_img)
         self.task_id += 1
 
@@ -274,7 +274,7 @@ class ObjectTracker:
                 closest_group.add_moving_object(moving_obj)
                 closest_group.update_state(True)
                 
-                if closest_group.get_nr_cars() == 0:
+                if closest_group.get_nr_bins() == 0:
                     self.detect_bins_in_object_group(closest_group)
             else:
                 self.add_new_moving_object(moving_obj)
