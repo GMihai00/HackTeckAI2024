@@ -50,24 +50,10 @@ class ObjectTracker:
             self.first_image_frame = self.image_queue.get()
             self.setup_lines()
     
-    def object_blocking_camera(self):
-        if self.first_image_frame is not None:
-            # Calculate the absolute difference between the two frames
-            diff = cv2.absdiff(self.first_image_frame, self.second_image_frame)
-            
-            # Convert the difference image to grayscale
-            gray_diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-            
-            # Threshold the grayscale image to binarize it
-            _, thresh = cv2.threshold(gray_diff, 30, 255, cv2.THRESH_BINARY)
-        
-            # Calculate the percentage of non-zero pixels
-            non_zero_count = cv2.countNonZero(thresh)
-            total_pixels = thresh.size
-            similarity_percentage = (non_zero_count / total_pixels) * 100
-            if similarity_percentage > 90:
-                print("Skipping frame due to high similarity.")
-                return True
+    def object_blocking_camera(self, color_percentage):
+        if color_percentage > 90:
+            print("SKIPPING frame due to high similarity.")
+            return True
         
         return False
     
@@ -85,11 +71,17 @@ class ObjectTracker:
                 # print("Fetching image")
                 self.second_image_frame = self.image_queue.get()
 
-                # skip frames that have 90%  pixels the same
-                # TO DO NOT WORKING
-                # if self.object_blocking_camera():
-                #     cv2.waitKey(0)
-                #     continue
+                # skip frames that have 90%  pixels the same (SOMETHING BLOCKING THE CAMERA)
+                
+                average_color = get_average_color(self.second_image_frame)
+                similarity_percentage = calculate_color_similarity(self.second_image_frame, average_color)
+                
+                # print(f"COLOR SIMILARITY: {similarity_percentage}")
+                if self.object_blocking_camera(similarity_percentage):
+                    if self.should_render:
+                        self.image_render.load_image(self.second_image_frame)
+                        self.image_render.start_rendering()
+                    continue
                 
                 img_threshold = self.image_processor.get_processed_merged_image(
                     self.first_image_frame, self.second_image_frame)
@@ -117,7 +109,7 @@ class ObjectTracker:
                     # self.image_render.load_image(img_threshold)
                     # self.image_render.start_rendering()
                     
-                    # this gets into a deadlock
+                    # all image
                     self.image_render.load_image(cpy)
                     self.image_render.start_rendering()
                 
