@@ -192,14 +192,6 @@ class ObjectTracker:
         self.task_id_to_obj_group.clear()
         self.task_id = 0
 
-        # right_lane_color = (0, 255, 0) if self.check_if_cars_crossed_right() else (0, 0, 255)
-        right_lane_color = (0, 0, 255)
-        # left_lane_color = (255, 105, 180) if self.check_if_cars_crossed_left() else (0, 255, 255)
-        left_lane_color = (0, 0, 255)
-        
-        cv2.line(img, self.crossing_line_right[0], self.crossing_line_right[1], right_lane_color, 2)
-        cv2.line(img, self.crossing_line_left[0], self.crossing_line_left[1], left_lane_color, 2)
-
         if self.attached_observer and (self.car_count_left or self.car_count_right):
             self.attached_observer.notify()
 
