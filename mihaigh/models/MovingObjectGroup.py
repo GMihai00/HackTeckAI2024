@@ -4,11 +4,11 @@ import numpy as np
 import threading
 
 class MovingObjectGroup:
-    MAX_OBJECTS_STORED = 250
-    MAX_FRAMES_WITHOUT_A_MATCH = 120
+    MAX_OBJECTS_STORED = 300
+    MAX_FRAMES_WITHOUT_A_MATCH = 100
+    MINIMUM_CONSECUTIVE_OBJECT_MATCHES = 10
     
-    instance_count = 0
-    bin_count = 1
+    BIN_COUNT = 1
     
     def __init__(self):
         self.center_positions = []
@@ -20,9 +20,7 @@ class MovingObjectGroup:
         self.nr_frames_without_being_bin = 0
         self.nr_bins = 0
         self.mutex_group = threading.Lock()
-        
-        MovingObjectGroup.instance_count += 1
-        self.id = MovingObjectGroup.instance_count
+        self.nr_consecutive_matches = 0
         self.bin_id = 0
     
     
@@ -61,9 +59,12 @@ class MovingObjectGroup:
     def update_state(self, found: bool):
         with self.mutex_group:
             if found:
-                self.obj_found_in_frame = True
+                self.nr_consecutive_matches+=1
+                if self.nr_consecutive_matches >= MovingObjectGroup.MINIMUM_CONSECUTIVE_OBJECT_MATCHES:
+                    self.obj_found_in_frame = True
                 self.nr_frames_without_match = 0
             else:
+                self.nr_consecutive_matches = 0
                 self.nr_frames_without_match += 1
                 self.obj_found_in_frame = False
 
@@ -131,14 +132,14 @@ class MovingObjectGroup:
     def update_bin_state(self, nr_bins: int):
         with self.mutex_group:
             if self.bin_id == 0 and nr_bins > 0:
-                self.bin_id = MovingObjectGroup.bin_count
-                MovingObjectGroup.bin_count = MovingObjectGroup.bin_count + 1
+                self.bin_id = MovingObjectGroup.BIN_COUNT
+                MovingObjectGroup.BIN_COUNT = MovingObjectGroup.BIN_COUNT + 1
                 
             if nr_bins == 0:
                 self.nr_frames_without_being_bin += 1
             else:
                 self.nr_frames_without_being_bin = 0
-                
+            
             self.nr_bins = nr_bins
 
     def get_nr_bins(self) -> int:

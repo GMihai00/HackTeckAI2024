@@ -102,7 +102,10 @@ class BinDetectClient:
             self.cond_var_detect.notify_all()
 
         result = {}
-        for task_id, future in self.bin_count_task_map.items():
+        
+        map_cpy = self.bin_count_task_map.copy()
+        
+        for task_id, future in map_cpy.items():
             result[task_id] = future.result()
 
         self.bin_count_task_map.clear()
