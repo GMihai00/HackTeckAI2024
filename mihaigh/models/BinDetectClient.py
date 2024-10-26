@@ -9,7 +9,11 @@ from ultralytics import YOLO
 class YOLOClient:
 
     def __init__(self):
-        self.model = YOLO('/home/mgherghinescu/projects/HackTeck2024/mihaigh/models/binmodel.pt')
+        import os
+
+        # Print the current working directory
+        print("Current Directory:", os.getcwd())
+        self.model = YOLO('./mihaigh/models/binmodel.pt')
         pass
         
     def connect(self, host, port):
@@ -25,7 +29,7 @@ class YOLOClient:
             for box in r.boxes:
                 confidence = float(box.conf[0].cpu().numpy())
                 if confidence >= 0.71:
-                    print(f"CONFIDENCE SCORE: {confidence}")
+                    # print(f"CONFIDENCE SCORE: {confidence}")
                     detections.append([confidence])
         
         return len(detections)
