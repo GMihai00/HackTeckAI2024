@@ -1,6 +1,7 @@
 import cv2
 import threading
 import queue
+import uuid
 
 class ImageRender:
     def __init__(self):
@@ -9,6 +10,7 @@ class ImageRender:
         self.shutting_down = False
         self.cond_var_render = threading.Condition()
         self.thread_render = None
+        self.id = uuid.uuid4()
 
     def load_image(self, image):
         with self.cond_var_render:
@@ -36,7 +38,7 @@ class ImageRender:
 
                 # Get the next image from the queue
                 image = self.image_queue.get()
-                cv2.imshow("FRAME", image)
+                cv2.imshow("FRAME_" + str(self.id), image)
                 
                 # Wait for a short time to display the image
                 cv2.waitKey(1)
@@ -44,7 +46,7 @@ class ImageRender:
         cv2.destroyAllWindows()
 
     def stop_rendering(self):
-        print("Stop rendering")
+        # print("Stop rendering")
         self.shutting_down = True
         try:
             self.cond_var_render.notify_all()
@@ -52,12 +54,12 @@ class ImageRender:
             with self.cond_var_render:
                 self.cond_var_render.notify_all()
         
-        print("THREAD BUSTER")
+        # print("THREAD BUSTER")
         if self.thread_render and self.thread_render.is_alive():
             self.thread_render.join()
 
         self.is_running = False  # Update is_running here after thread has joined
-        print("DONE DONE ")
+        # print("DONE DONE ")
 
     def __del__(self):
         print("STOPPING RENDERING")

@@ -61,47 +61,47 @@ class ObjectTracker:
                     self.cond_var_process.wait()
 
                 if not self.camera.is_running():
-                    print("SHUTTING DONW OBJECT TRACKER!")
+                    # print("SHUTTING DONW OBJECT TRACKER!")
                     break
                 
-                print("Fetching image")
+                # print("Fetching image")
                 self.second_image_frame = self.image_queue.get()
-                print("Processing image")
+                # print("Processing image")
 
                 img_threshold = self.image_processor.get_processed_merged_image(
                     self.first_image_frame, self.second_image_frame)
                 
-                print("Detecting")   
+                # print("Detecting")   
                 detected_moving_objs = self.image_processor.get_moving_objects_from_img(img_threshold)
                 
-                print("Processing detected objects")
+                # print("Processing detected objects")
                 if not self.moving_objects:
                     for moving_obj in detected_moving_objs:
                         self.add_new_moving_object(moving_obj)
                 else:
                     self.match_found_obj_to_existing_ones(detected_moving_objs)
                 
-                print("Done processing")
+                # print("Done processing")
                 
                 cpy = self.second_image_frame.copy()
                 self.draw_results_on_image(cpy)
                 
-                print("DONE DRAWING")
+                # print("DONE DRAWING")
                 
                 
                 if self.should_render:
                     # movement only
-                    # self.image_render.load_image(img_threshold)
-                    # self.image_render.start_rendering()
+                    self.image_render.load_image(img_threshold)
+                    self.image_render.start_rendering()
                     
                     # this gets into a deadlock
-                    self.image_render.load_image(cpy)
-                    self.image_render.start_rendering()
+                    # self.image_render.load_image(cpy)
+                    # self.image_render.start_rendering()
                 
                 detected_moving_objs.clear()
                 self.first_image_frame = self.second_image_frame.copy()
                 
-                print("DOne with everything")
+                # print("DOne with everything")
 
     def start_tracking(self, should_render=False):
         if self.camera.start():
@@ -117,17 +117,17 @@ class ObjectTracker:
 
     def camera_capture(self):
         while self.camera.is_running():      
-            print("Getting image")
+            # print("Getting image")
             image = self.camera.get_image()
             if image is not None:
                 with self.cond_var_process:  # Acquires the lock for cond_var_process
-                    print("Image captured and added to queue")
+                    # print("Image captured and added to queue")
 
                     self.image_queue.put(image)
-                    print(f"SIZE QUEUE !!! {self.image_queue.qsize()}")
+                    # print(f"SIZE QUEUE !!! {self.image_queue.qsize()}")
                     self.cond_var_process.notify()  # Notifies waiting threads
             else:
-                print("NO IMAGE TO FETCH!!!!!!!!!!!!!!!")
+                # print("NO IMAGE TO FETCH!!!!!!!!!!!!!!!")
                 break
         self.camera.stop()
         try:
@@ -138,7 +138,7 @@ class ObjectTracker:
 
 
     def stop_tracking(self):
-        print("Stopping tracking!!!")
+        # print("Stopping tracking!!!")
         self.camera.stop()
         try:
             self.cond_var_camera.notify()
@@ -153,21 +153,21 @@ class ObjectTracker:
         self.car_count_left = 0
         self.car_count_right = 0
         
-        print("STOPPPPP")
+        # print("STOPPPPP")
         try:
             self.cond_var_process.notify()
         except: 
             with self.cond_var_process:  # Acquires the lock for cond_var_process
                 self.cond_var_process.notify()  # Notifies waiting threads
-        print("STOPPING THREADSS")
+        # print("STOPPING THREADSS")
         if self.thread_process and self.thread_process.is_alive():
             self.thread_process.join()
             
-        print("STOPPING NEXT THREADS")
+        # print("STOPPING NEXT THREADS")
         if self.thread_camera and self.thread_camera.is_alive():
             self.thread_camera.join()
             
-        print("Stopping bin client")
+        # print("Stopping bin client")
         
         self.bin_detector.stop_detecting()
         

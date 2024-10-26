@@ -47,9 +47,9 @@ class Camera:
     def _read_frames(self):
         while not self.shutting_down and self.video_capture and self.video_capture.isOpened():
             with self.cond_var_camera:
-                print("LOCK1")
+                # print("LOCK1")
                 if self.current_image is not None and self.video_capture and self.video_capture.isOpened():
-                    print("IMAGE ALREADY EXISTING WAITING FOR READ!")
+                    # print("IMAGE ALREADY EXISTING WAITING FOR READ!")
                     try:
                         self.cond_var_read.notify()
                     except:
@@ -82,9 +82,9 @@ class Camera:
 
     def get_image(self) -> Optional[cv2.Mat]:
         with self.cond_var_read:
-            print("LOCK2")
+            # print("LOCK2")
             if self.current_image is None:
-                print("Current image is none")
+                # print("Current image is none")
                 try:
                     self.cond_var_camera.notify()
                 except:
@@ -97,7 +97,7 @@ class Camera:
                 print("REACHED THE END OF THE VIDEO!!!")
                 return None
                 
-            print("Getting image")
+            # print("Getting image")
             image_copy = self.current_image.copy()
             self.current_image = None
             try:
