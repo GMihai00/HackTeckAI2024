@@ -15,12 +15,6 @@ def main():
     print("Program is running. Press Ctrl+C to stop.")
     start_time = time.time() 
     stop_event = threading.Event()  # Event to signal stop
-    
-    # try:
-    #     while True:
-    #         time.sleep(1)  # Keeps the program alive and responsive
-    # except KeyboardInterrupt:
-    #     print("\nProgram stopped by user.")
         
     try:
         stop_event.wait()  # Wait indefinitely until the event is set

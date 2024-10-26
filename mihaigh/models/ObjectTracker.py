@@ -91,12 +91,12 @@ class ObjectTracker:
                 
                 if self.should_render:
                     # movement only
-                    self.image_render.load_image(img_threshold)
-                    self.image_render.start_rendering()
+                    # self.image_render.load_image(img_threshold)
+                    # self.image_render.start_rendering()
                     
                     # this gets into a deadlock
-                    # self.image_render.load_image(cpy)
-                    # self.image_render.start_rendering()
+                    self.image_render.load_image(cpy)
+                    self.image_render.start_rendering()
                 
                 detected_moving_objs.clear()
                 self.first_image_frame = self.second_image_frame.copy()
@@ -182,7 +182,7 @@ class ObjectTracker:
         self.crossing_line_left = [(0, self.horizontal_line_position), (width // 2 - 1, self.horizontal_line_position)]
 
     def draw_results_on_image(self, img):
-        self.draw_obj_info_on_image(img)
+        self.draw_obj_info_on_image(img, self.moving_objects)
         
         car_count_map = self.bin_detector.wait_for_finish()
         for task_id, nr_cars in car_count_map.items():
@@ -205,9 +205,34 @@ class ObjectTracker:
 
         self.draw_obj_count_on_image(img)
 
-    def draw_obj_info_on_image(self, img):
-        # Custom drawing for each detected object with a unique ID.
-        pass
+    def draw_obj_info_on_image(self, img, moving_objects):
+        cnt = 0
+        for moving_obj_group in moving_objects:
+            moving_obj = moving_obj_group.get_last_state()
+            
+            if moving_obj:
+                if moving_obj_group.get_nr_cars() != 0:
+                    color = (0, 0, 255)  # SCALAR_RED in BGR
+                else:
+                    color = (0, 255, 255)  # SCALAR_YELLOW in BGR
+    
+                # Draw bounding rectangle
+                cv2.rectangle(img, moving_obj.get_bounding_rect(), color, 2)
+                
+                # Set font parameters
+                font_face = cv2.FONT_HERSHEY_SIMPLEX
+                font_scale = (img.shape[0] * img.shape[1]) / 300000.0
+                font_thickness = int(round(font_scale * 1.0))
+                
+                # Get center position for text placement
+                center_position = moving_obj_group.get_last_center_position()
+                if center_position:
+                    cv2.putText(
+                        img, str(cnt), 
+                        (int(center_position[0]), int(center_position[1])), 
+                        font_face, font_scale, (0, 255, 0), font_thickness  # SCALAR_GREEN in BGR
+                    )
+            cnt += 1
 
     def draw_obj_count_on_image(self, img):
         font_face = cv2.FONT_HERSHEY_SIMPLEX
