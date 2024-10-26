@@ -10,8 +10,8 @@ class TensorFlowClient:
         # Placeholder for connecting to TensorFlow server
         return True
 
-    def get_car_count_inside_image(self, image):
-        # Placeholder for TensorFlow model to count cars in the image always return 1 car
+    def get_bin_count_inside_image(self, image):
+        # Placeholder for TensorFlow model to count bins in the image always return 1 bin
         return 1
 
 class BinDetectClient:
@@ -21,7 +21,7 @@ class BinDetectClient:
         self.is_running = False
         self.shutting_down = False
         self.should_clear_all_tasks = False
-        self.car_count_task_map = {}
+        self.bin_count_task_map = {}
         self.cond_var_detect = threading.Condition()
         self.thread_detect = None
         self.executor = ThreadPoolExecutor()
@@ -35,8 +35,8 @@ class BinDetectClient:
             self.cond_var_detect.notify()
 
     def get_bins_present_in_image(self, image):
-        # Returns a future representing the result of car counting in the image
-        return self.executor.submit(self.tensorflow_client.get_car_count_inside_image, image)
+        # Returns a future representing the result of bin counting in the image
+        return self.executor.submit(self.tensorflow_client.get_bin_count_inside_image, image)
 
     def start_detecting(self):
         if self.is_running:
@@ -63,10 +63,10 @@ class BinDetectClient:
                             break
 
                         task_id, image = self.task_queue.get()
-                        self.car_count_task_map[task_id] = self.get_bins_present_in_image(image)
+                        self.bin_count_task_map[task_id] = self.get_bins_present_in_image(image)
                 else:
                     task_id, image = self.task_queue.get()
-                    self.car_count_task_map[task_id] = self.get_bins_present_in_image(image)
+                    self.bin_count_task_map[task_id] = self.get_bins_present_in_image(image)
 
     def stop_detecting(self):
         self.shutting_down = True
@@ -85,10 +85,10 @@ class BinDetectClient:
             self.cond_var_detect.notify_all()
 
         result = {}
-        for task_id, future in self.car_count_task_map.items():
+        for task_id, future in self.bin_count_task_map.items():
             result[task_id] = future.result()
 
-        self.car_count_task_map.clear()
+        self.bin_count_task_map.clear()
         self.should_clear_all_tasks = False
         return result
 
