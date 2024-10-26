@@ -2,6 +2,8 @@ from models.ObjectTracker import ObjectTracker
 import time
 import threading
 
+from models.MovingObjectGroup import MovingObjectGroup
+
 def main():
     # short edge cases
     # binTracker = ObjectTracker("/home/mgherghinescu/projects/HackTeck2024/Dataset/Videori 240520/240520/240520_064129_064229.mp4")
@@ -27,6 +29,8 @@ def main():
     end_time = time.time() 
     elapsed_time = end_time - start_time
     print(f"\nProgram stopped by user. Time elapsed: {elapsed_time:.2f} seconds")
+    
+    print(f"TOTAL NUMBER OF BINS DETECTED: {MovingObjectGroup.BIN_COUNT}")
     print("EXITING MAIN")
     
 
