@@ -3,12 +3,30 @@ import cv2
 import numpy as np
 import threading
 
+import csv
+
+def save_data_to_csv():
+    # Assuming MovingObjectGroup.BIN_TO_TIMESTAMP_MAP exists
+    print("Saving data to csv")
+    with open("output.csv", mode="w", newline="") as csv_file:
+        writer = csv.writer(csv_file)
+        # Write the header
+        writer.writerow(["Key", "Start", "End"])
+    
+        # Write each row
+        for key, value in MovingObjectGroup.BIN_TO_TIMESTAMP_MAP.items():
+            start, end = value
+            writer.writerow([key, start, end])
+            
 class MovingObjectGroup:
     MAX_OBJECTS_STORED = 300
     MAX_FRAMES_WITHOUT_A_MATCH = 90
     MINIMUM_CONSECUTIVE_OBJECT_MATCHES = 4
     
     BIN_COUNT = 1
+    
+    BIN_TO_TIMESTAMP_MAP = {}
+    bin_map_lock = threading.Lock()
     
     def __init__(self):
         self.center_positions = []
@@ -22,6 +40,8 @@ class MovingObjectGroup:
         self.mutex_group = threading.Lock()
         self.nr_consecutive_matches = 0
         self.bin_id = 0
+        self.start_time_stamp = None
+        self.end_time_stamp = None
     
     def get_id(self):
         # self.bin_id
@@ -125,8 +145,15 @@ class MovingObjectGroup:
                 # If there's an error, return the original bounding rectangle of the last object state
                 return img[self.moving_object_states[-1].get_bounding_rect()]
 
-    def update_bin_state(self, nr_bins: int):
+    def update_timestamp(self, time_stamp):
+        if self.start_time_stamp == None:
+            self.start_time_stamp = time_stamp
+            
+        self.end_time_stamp = time_stamp
+        
+    def update_bin_state(self, nr_bins: int, time_stamp):
         with self.mutex_group:
+            self.update_timestamp(time_stamp)
             if nr_bins == 0:
                 self.nr_consecutive_matches = 0
                 self.nr_frames_without_being_bin += 1
@@ -134,7 +161,7 @@ class MovingObjectGroup:
                 self.nr_consecutive_matches+=1
                 self.nr_frames_without_being_bin = 0
                 if self.nr_consecutive_matches >= MovingObjectGroup.MINIMUM_CONSECUTIVE_OBJECT_MATCHES and self.bin_id == 0:
-                    self.bin_id = MovingObjectGroup.BIN_COUNT
+                    self.bin_id = MovingObjectGroup.BIN_COUNT 
                     MovingObjectGroup.BIN_COUNT = MovingObjectGroup.BIN_COUNT + 1
             
             self.nr_bins = nr_bins
@@ -142,3 +169,14 @@ class MovingObjectGroup:
     def get_nr_bins(self) -> int:
         with self.mutex_group:
             return self.nr_bins
+            
+    def __del__(self):
+        if self.bin_id != 0:
+                
+            print(f"Bin {self.bin_id} TIMESTAMPS: {int(self.start_time_stamp)} ms - {int(self.end_time_stamp)} ms")
+            
+            MovingObjectGroup.BIN_TO_TIMESTAMP_MAP[self.bin_id] = {int(self.start_time_stamp), int(self.end_time_stamp)}
+        
+            with MovingObjectGroup.bin_map_lock:
+                save_data_to_csv()
+            

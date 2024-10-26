@@ -17,7 +17,7 @@ from .Utils import *
 from .MovingObject import *
 
 class ObjectTracker:
-    def __init__(self, camera_source, observer=None):
+    def __init__(self, camera_source, stop_event=None):
         self.camera = Camera(path_video = camera_source)  # Can be camera ID or video path
         self.image_processor = ImageProcessor()
         self.image_render = ImageRender()
@@ -25,6 +25,8 @@ class ObjectTracker:
         self.image_queue = Queue()
         self.first_image_frame = None
         self.second_image_frame = None
+        self.first_image_timestamp = None
+        self.second_image_timestamp = None
         self.should_render = False
         self.task_id_to_obj_group = {}
         self.task_id = 0
@@ -38,6 +40,7 @@ class ObjectTracker:
         self.cond_var_process = threading.Condition(self.mutex_process)
         self.thread_camera = None
         self.thread_process = None
+        self.stop_event = stop_event
 
     def wait_for_first_frame_appearance(self):
         with self.cond_var_process:
@@ -47,7 +50,7 @@ class ObjectTracker:
             if not self.camera.is_running():
                 return
 
-            self.first_image_frame = self.image_queue.get()
+            self.first_image_frame, self.first_image_timestamp = self.image_queue.get()
             self.setup_lines()
     
     def object_blocking_camera(self, color_percentage):
@@ -69,7 +72,7 @@ class ObjectTracker:
                     break
                 
                 # print("Fetching image")
-                self.second_image_frame = self.image_queue.get()
+                self.second_image_frame, self.second_image_timestamp = self.image_queue.get()
 
                 # skip frames that have 90%  pixels the same (SOMETHING BLOCKING THE CAMERA)
                 
@@ -133,12 +136,12 @@ class ObjectTracker:
     def camera_capture(self):
         while self.camera.is_running():      
             # print("Getting image")
-            image = self.camera.get_image()
+            image, timestamp = self.camera.get_image_and_timestamp()
             if image is not None:
                 with self.cond_var_process:  # Acquires the lock for cond_var_process
                     # print("Image captured and added to queue")
 
-                    self.image_queue.put(image)
+                    self.image_queue.put((image, timestamp))
                     # print(f"SIZE QUEUE !!! {self.image_queue.qsize()}")
                     self.cond_var_process.notify()  # Notifies waiting threads
             else:
@@ -150,6 +153,7 @@ class ObjectTracker:
         except:
             with self.cond_var_process:
                 self.cond_var_process.notify()
+        self.stop_event.set()
 
 
     def stop_tracking(self):
@@ -200,7 +204,7 @@ class ObjectTracker:
         bin_count_map = self.bin_detector.wait_for_finish()
         for task_id, nr_bins in bin_count_map.items():
             if task_id in self.task_id_to_obj_group:
-                self.task_id_to_obj_group[task_id].update_bin_state(nr_bins)
+                self.task_id_to_obj_group[task_id].update_bin_state(nr_bins, self.second_image_timestamp)
 
         self.task_id_to_obj_group.clear()
         self.task_id = 0

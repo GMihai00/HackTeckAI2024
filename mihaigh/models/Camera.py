@@ -2,6 +2,8 @@ import cv2
 import threading
 import time
 from typing import Optional
+import numpy as np
+
 
 class Camera:
     def __init__(self, id_: Optional[int] = None, path_video: Optional[str] = None):
@@ -12,9 +14,11 @@ class Camera:
         self.shutting_down = False
         self.thread_read = None
         self.mutex_camera = threading.Lock()
+        self.current_timestamp = 0
         self.cond_var_camera = threading.Condition(self.mutex_camera)
         self.lock = threading.Lock()
         self.cond_var_read = threading.Condition(self.lock)
+        self.calc_timestamps = [0.0]
 
     def start(self) -> bool:
         if self.video_capture:
@@ -25,7 +29,9 @@ class Camera:
             self.video_capture = cv2.VideoCapture(self.path_video)
         else:
             self.video_capture = cv2.VideoCapture(self.id_)
-
+        
+        self.fps = self.video_capture.get(cv2.CAP_PROP_FPS)
+                
         self.shutting_down = False
         self.thread_read = threading.Thread(target=self._read_frames)
         self.thread_read.start()
@@ -43,7 +49,13 @@ class Camera:
             self.video_capture.release()
             self.video_capture = None
         print("Camera stopped")
-
+    
+    def update_current_timestamp(self):
+        timestamp  = self.video_capture.get(cv2.CAP_PROP_POS_MSEC)
+        self.calc_timestamps.append(self.calc_timestamps[-1] + 1000/self.fps)
+        
+        self.current_timestamp += np.uint8(abs(timestamp - self.calc_timestamps[-1]))
+        
     def _read_frames(self):
         while not self.shutting_down and self.video_capture and self.video_capture.isOpened():
             with self.cond_var_camera:
@@ -61,6 +73,9 @@ class Camera:
                 if ret:
                     frame = cv2.resize(frame, (640, 640))
                     self.current_image = frame
+                    
+                    self.update_current_timestamp()
+                    
                     with self.cond_var_read:
                         self.cond_var_read.notify()
                 else:
@@ -80,7 +95,7 @@ class Camera:
     def get_id(self) -> int:
         return self.id_
 
-    def get_image(self) -> Optional[cv2.Mat]:
+    def get_image_and_timestamp(self) -> Optional[cv2.Mat]:
         with self.cond_var_read:
             # print("LOCK2")
             if self.current_image is None:
@@ -95,17 +110,18 @@ class Camera:
             
             if self.current_image is None:
                 print("REACHED THE END OF THE VIDEO!!!")
-                return None
+                return None, None
                 
             # print("Getting image")
             image_copy = self.current_image.copy()
+            timestamp = self.current_timestamp
             self.current_image = None
             try:
                 self.cond_var_camera.notify()
             except:
                 with self.cond_var_camera:
                     self.cond_var_camera.notify()
-            return image_copy
+            return image_copy, timestamp
             
     def __del__(self):
         print("DELETING CAMERA")
