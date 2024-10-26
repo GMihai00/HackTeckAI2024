@@ -1,7 +1,5 @@
 
 import math
-from sklearn.cluster import KMeans
-import numpy as np
 import cv2
 
 def distance_between_points(point1, point2):
