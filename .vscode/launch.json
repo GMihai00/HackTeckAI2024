@@ -8,7 +8,9 @@
             "program": "${workspaceFolder}/embedded/main.py",
             "args": [
                 "--video_path",
-                "/home/mgherghinescu/projects/HackTeck2024/Dataset/output_merged_video.mp4"
+                "/home/mgherghinescu/projects/HackTeck2024/Dataset/output_merged_video.mp4",
+                "--enable_ocr",
+                "True"
             ],
             "console": "integratedTerminal"
         }

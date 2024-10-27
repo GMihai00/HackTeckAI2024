@@ -5,7 +5,7 @@ from typing import Optional
 import numpy as np
 
 from .TimestampExtractorOCR import TimestampExtractorOCR
-
+from .LambdaCaptureOCR import LambdaCaptureOCR
 class Camera:
     def __init__(self, id_: Optional[int] = None, path_video: Optional[str] = None, enable_ocr=False):
         self.id_ = id_ if id_ is not None else -1
@@ -62,7 +62,7 @@ class Camera:
             
             self.current_timestamp += np.uint8(abs(timestamp - self.calc_timestamps[-1]))
         else:
-            self.current_timestamp = self.time_stamp_extractor.extract_timestamp(frame)
+            self.current_timestamp= LambdaCaptureOCR(self.time_stamp_extractor, frame)
         
     def _read_frames(self):
         while not self.shutting_down and self.video_capture and self.video_capture.isOpened():
