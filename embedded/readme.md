@@ -77,6 +77,9 @@ Once a trash bin is detected we save the start and end timestamp of the bin proc
 For a sample run, go to the head of the repo and run: 
 
 ```ps1
+
+pip install -r ./embedded/requirements.txt
+
 python ./embedded/main.py
 --video_path "<path>"
 
