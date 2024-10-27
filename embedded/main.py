@@ -14,14 +14,13 @@ def main():
     parser.add_argument("--render_video", type=bool, help="If enabled display video content, to be disabled when running in prod", default=True)
     parser.add_argument("--render_post_processed_video", type=bool, help="Learning flag, to understand the applied video processing operations.", default=False)
     
-    args = parser.parse_args()
-    if not os.path.exists(args.video_path):
-        print("Path not found!")
-    
-    
     # short edge cases "/home/mgherghinescu/projects/HackTeck2024/Dataset/Videori 240520/240520/240520_064129_064229.mp4"
     # 15 min long "/home/mgherghinescu/projects/HackTeck2024/Dataset/output_merged_video.mp4"
     # 3h video just for looking for issues "/home/mgherghinescu/projects/HackTeck2024/Dataset/mergedday1_3h.mp4"
+    
+    args = parser.parse_args()
+    if not os.path.exists(args.video_path):
+        print("Path not found!")
     
     print("Program is running. Press Ctrl+C to stop.")
     start_time = time.time() 
