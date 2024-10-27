@@ -69,7 +69,7 @@ To avoid the cases when the camera is obstructed by other objects, like the case
 Once a trash bin is detected we save the start and end timestamp of the bin processing inside a csv file. For this we had 2 approaches:
 
 - Calculating the time within the video, as it is saved on disk
-- Additional logic that extract exact timestamp within the video, using gcd, for the cameras that have this additional feature. By default, this option is disabled
+- Additional logic that extract exact timestamp within the video, using gcd, for the cameras that have this additional feature. By default, this option is disabled due to adding additional computations, lowering the performance
 
 
 # Running the code
