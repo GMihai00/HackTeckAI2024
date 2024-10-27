@@ -13,7 +13,7 @@ class YOLOClient:
 
         # Print the current working directory
         print("Current Directory:", os.getcwd())
-        self.model = YOLO('./mihaigh/models/binmodel.pt')
+        self.model = YOLO('./embedded/models/binmodel.pt')
         pass
         
     def connect(self, host, port):

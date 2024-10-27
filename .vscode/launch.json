@@ -5,7 +5,7 @@
             "name": "Run Python Script with Args",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/mihaigh/main.py",
+            "program": "${workspaceFolder}/embedded/main.py",
             "args": [
                 "--video_path",
                 "/home/mgherghinescu/projects/HackTeck2024/Dataset/output_merged_video.mp4"
