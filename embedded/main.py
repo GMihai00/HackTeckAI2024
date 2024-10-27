@@ -9,7 +9,7 @@ def main():
     parser = argparse.ArgumentParser()
     
     parser.add_argument("--video_path", type=str, help="Path to video file to be processed", required=True)
-    parser.add_argument("--enable_ocr", type=bool, help="Enable additional ocr processing of timestamp within video", default=True)
+    parser.add_argument("--enable_ocr", type=bool, help="Enable additional ocr processing of timestamp within video", default=False)
     parser.add_argument("--draw_moving", type=bool, help="Enable flag to draw all moving objects bounding boxes", default=False)
     parser.add_argument("--render_video", type=bool, help="If enabled display video content, to be disabled when running in prod", default=True)
     parser.add_argument("--render_post_processed_video", type=bool, help="Learning flag, to understand the applied video processing operations.", default=False)
