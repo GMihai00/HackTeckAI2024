@@ -9,7 +9,7 @@ import argparse
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description="Object tracking on a video.")
-parser.add_argument('--video_path', type=str, default=r"videos/240520_064129_064229.mp4")
+parser.add_argument('--video_path', type=str, default=r"videos/240517_061821_061831.mp4")
 args = parser.parse_args()
 
 # Set the video path from the argument or default value
@@ -88,7 +88,7 @@ while cap.isOpened():
         # Draw bounding box and ID on the frame if count > 0
         if valid_container_count > 0:
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(frame, f'Count: {valid_container_count}', (x1, y1 - 10),
+            cv2.putText(frame, f'ID: {valid_container_count}', (x1, y1 - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
         # Check or update consecutive count for the current ID
