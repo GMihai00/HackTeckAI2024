@@ -1,0 +1,5 @@
+# data.yaml
+train: fine_tune/dataset/images/train
+val: fine_tune/dataset/images/val
+nc: 1
+names: ['container']
