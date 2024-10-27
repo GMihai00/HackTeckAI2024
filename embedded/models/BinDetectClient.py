@@ -116,7 +116,5 @@ class BinDetectClient:
         return result
 
     def __del__(self):
-        print("STOPPING BIN CLIENT")
         self.stop_detecting()
         self.executor.shutdown()
-        print("DONE STOPPING BIN CLIENT")
