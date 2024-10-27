@@ -85,6 +85,14 @@ python ./embedded/main.py
 
 ```
 
+For exact timestamps from the video add this feature flag:
+
+```ps1
+python ./embedded/main.py
+--video_path "<path>"
+--enable_ocr "True"
+```
+
 ## Enabling additional feature flags
 
 For enabling additional features, please consult the man, using "-h" or "--help" flag

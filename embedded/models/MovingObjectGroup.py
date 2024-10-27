@@ -2,9 +2,11 @@ from typing import List, Optional, Tuple
 import cv2
 import numpy as np
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import csv
+
+from .LambdaCaptureOCR import LambdaCaptureOCR
 
 def save_data_to_csv():
     # Assuming MovingObjectGroup.BIN_TO_TIMESTAMP_MAP exists
@@ -147,7 +149,13 @@ class MovingObjectGroup:
                 return img[self.moving_object_states[-1].get_bounding_rect()]
 
     def update_timestamp(self, time_stamp):
-        if self.start_time_stamp == None:
+        
+        if isinstance(time_stamp, LambdaCaptureOCR):       
+            if self.start_time_stamp == None:
+                time = time_stamp.run()
+                if time != None:
+                    self.start_time_stamp = time        
+        elif self.start_time_stamp == None:
             self.start_time_stamp = time_stamp
             
         self.end_time_stamp = time_stamp
@@ -174,15 +182,24 @@ class MovingObjectGroup:
             
     def __del__(self):
         if self.bin_id != 0:
+            
+            if self.start_time_stamp == None:
+                self.start_time_stamp = self.end_time_stamp
+            
+            if isinstance(self.end_time_stamp, LambdaCaptureOCR):
+            
+                self.end_time_stamp = self.end_time_stamp.run()
                 
-            if not isinstance(self.start_time_stamp, datetime): 
-                print(f"Bin {self.bin_id} TIMESTAMPS: {int(self.start_time_stamp)} ms - {int(self.end_time_stamp)} ms")
-                
-                MovingObjectGroup.BIN_TO_TIMESTAMP_MAP[self.bin_id] = {int(self.start_time_stamp), int(self.end_time_stamp)}
-            else:
+                if self.start_time_stamp == self.end_time_stamp:
+                    # Increment end_time_stamp by 1 second (1000 milliseconds)
+                    self.end_time_stamp += timedelta(seconds=1)
+                    
                 print(f"Bin {self.bin_id} TIMESTAMPS: {self.start_time_stamp} - {self.end_time_stamp}")
-                
+            
                 MovingObjectGroup.BIN_TO_TIMESTAMP_MAP[self.bin_id] = {self.start_time_stamp, self.end_time_stamp}
+            else:
+                print(f"Bin {self.bin_id} TIMESTAMPS: {int(self.start_time_stamp)} ms - {int(self.end_time_stamp)} ms")
+                MovingObjectGroup.BIN_TO_TIMESTAMP_MAP[self.bin_id] = {int(self.start_time_stamp), int(self.end_time_stamp)}
                 
             with MovingObjectGroup.bin_map_lock:
                 save_data_to_csv()
