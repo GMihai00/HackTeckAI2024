@@ -9,7 +9,7 @@ import csv
 def save_data_to_csv():
     # Assuming MovingObjectGroup.BIN_TO_TIMESTAMP_MAP exists
     print("Saving data to csv")
-    with open("output.csv", mode="w", newline="") as csv_file:
+    with open("output_embedded.csv", mode="w", newline="") as csv_file:
         writer = csv.writer(csv_file)
         # Write the header
         writer.writerow(["Key", "Start", "End"])
