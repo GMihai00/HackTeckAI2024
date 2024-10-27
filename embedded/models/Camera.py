@@ -6,7 +6,7 @@ import numpy as np
 
 
 class Camera:
-    def __init__(self, id_: Optional[int] = None, path_video: Optional[str] = None):
+    def __init__(self, id_: Optional[int] = None, path_video: Optional[str] = None, enable_ocr=False):
         self.id_ = id_ if id_ is not None else -1
         self.path_video = path_video
         self.video_capture = None
@@ -19,6 +19,7 @@ class Camera:
         self.lock = threading.Lock()
         self.cond_var_read = threading.Condition(self.lock)
         self.calc_timestamps = [0.0]
+        self.enable_ocr = enable_ocr
 
     def start(self) -> bool:
         if self.video_capture:
@@ -109,7 +110,7 @@ class Camera:
                     self.cond_var_read.wait()
             
             if self.current_image is None:
-                print("REACHED THE END OF THE VIDEO!!!")
+                print("Reached the end of the video")
                 return None, None
                 
             # print("Getting image")
@@ -124,4 +125,4 @@ class Camera:
             return image_copy, timestamp
             
     def __del__(self):
-        print("DELETING CAMERA")
+        print("Deleting camera")

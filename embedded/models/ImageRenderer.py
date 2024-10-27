@@ -65,6 +65,6 @@ class ImageRender:
         # print("DONE DONE ")
 
     def __del__(self):
-        print("STOPPING RENDERING")
+        # print("STOPPING RENDERING")
         self.stop_rendering()
-        print("SOMETHING")
+        # print("SOMETHING")

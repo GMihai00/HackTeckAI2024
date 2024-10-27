@@ -17,8 +17,8 @@ from .Utils import *
 from .MovingObject import *
 
 class ObjectTracker:
-    def __init__(self, camera_source, stop_event=None):
-        self.camera = Camera(path_video = camera_source)  # Can be camera ID or video path
+    def __init__(self, camera_source, stop_event=None, enable_ocr=False, draw_moving_objects=False, render_post_processed_video=False):
+        self.camera = Camera(path_video = camera_source, enable_ocr=enable_ocr)  # Can be camera ID or video path
         self.image_processor = ImageProcessor()
         self.image_render = ImageRender()
         self.bin_detector = BinDetectClient()
@@ -41,6 +41,8 @@ class ObjectTracker:
         self.thread_camera = None
         self.thread_process = None
         self.stop_event = stop_event
+        self.draw_moving_objects = draw_moving_objects
+        self.render_post_processed_video = render_post_processed_video
 
     def wait_for_first_frame_appearance(self):
         with self.cond_var_process:
@@ -79,15 +81,22 @@ class ObjectTracker:
                 average_color = get_average_color(self.second_image_frame)
                 similarity_percentage = calculate_color_similarity(self.second_image_frame, average_color)
                 
+                img_threshold = self.image_processor.get_processed_merged_image(
+                    self.first_image_frame, self.second_image_frame)
+                    
                 # print(f"COLOR SIMILARITY: {similarity_percentage}")
                 if self.object_blocking_camera(similarity_percentage):
                     if self.should_render:
-                        self.image_render.load_image(self.second_image_frame)
-                        self.image_render.start_rendering()
+                        if self.render_post_processed_video:
+                            # movement only
+                            self.image_render.load_image(img_threshold)
+                            self.image_render.start_rendering()
+                        else:
+                            # all image
+                            self.image_render.load_image(cpy)
+                            self.image_render.start_rendering()
                     continue
                 
-                img_threshold = self.image_processor.get_processed_merged_image(
-                    self.first_image_frame, self.second_image_frame)
                 
                 # print("Detecting")   
                 detected_moving_objs = self.image_processor.get_moving_objects_from_img(img_threshold)
@@ -106,15 +115,15 @@ class ObjectTracker:
                 
                 # print("DONE DRAWING")
                 
-                
                 if self.should_render:
-                    # movement only
-                    # self.image_render.load_image(img_threshold)
-                    # self.image_render.start_rendering()
-                    
-                    # all image
-                    self.image_render.load_image(cpy)
-                    self.image_render.start_rendering()
+                    if self.render_post_processed_video:
+                        # movement only
+                        self.image_render.load_image(img_threshold)
+                        self.image_render.start_rendering()
+                    else:
+                        # all image
+                        self.image_render.load_image(cpy)
+                        self.image_render.start_rendering()
                 
                 detected_moving_objs.clear()
                 self.first_image_frame = self.second_image_frame.copy()
@@ -188,7 +197,7 @@ class ObjectTracker:
         
         self.bin_detector.stop_detecting()
         
-        print("DONE")
+        # print("DONE")
 
 
     def setup_lines(self):
@@ -215,9 +224,15 @@ class ObjectTracker:
             moving_obj = moving_obj_group.get_last_state()
             
             if moving_obj:
+                should_draw = False
                 if moving_obj_group.bin_id != 0:
                     color = (0, 0, 255)  # SCALAR_RED in BGR
-                    # Draw bounding rectangle
+                    should_draw = True
+                else:
+                    color = (0, 255, 255)  # SCALAR_YELLOW in BGR
+                    should_draw = self.draw_moving_objects
+                    
+                if should_draw:
                     cv2.rectangle(img, moving_obj.get_bounding_rect(), color, 2)
                     
                     # Set font parameters
@@ -233,9 +248,7 @@ class ObjectTracker:
                             (int(center_position[0]), int(center_position[1])), 
                             font_face, font_scale, (0, 255, 0), font_thickness  # SCALAR_GREEN in BGR
                         )
-                else:
-                    color = (0, 255, 255)  # SCALAR_YELLOW in BGR
-    
+                        
             cnt += 1
 
 
@@ -308,4 +321,4 @@ class ObjectTracker:
         self.moving_objects = [obj_group for obj_group in self.moving_objects if obj_group and obj_group.still_being_tracked()]
     
     def __del__(self):
-        print("DELETING OBJECT TRACKER")
+        print("Deleting object tracker")

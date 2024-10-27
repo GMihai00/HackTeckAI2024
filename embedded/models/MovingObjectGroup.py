@@ -2,6 +2,7 @@ from typing import List, Optional, Tuple
 import cv2
 import numpy as np
 import threading
+from datetime import datetime
 
 import csv
 
@@ -153,7 +154,8 @@ class MovingObjectGroup:
         
     def update_bin_state(self, nr_bins: int, time_stamp):
         with self.mutex_group:
-            self.update_timestamp(time_stamp)
+            if time_stamp:
+                self.update_timestamp(time_stamp)
             if nr_bins == 0:
                 self.nr_consecutive_matches = 0
                 self.nr_frames_without_being_bin += 1
@@ -173,10 +175,15 @@ class MovingObjectGroup:
     def __del__(self):
         if self.bin_id != 0:
                 
-            print(f"Bin {self.bin_id} TIMESTAMPS: {int(self.start_time_stamp)} ms - {int(self.end_time_stamp)} ms")
-            
-            MovingObjectGroup.BIN_TO_TIMESTAMP_MAP[self.bin_id] = {int(self.start_time_stamp), int(self.end_time_stamp)}
-        
+            if not isinstance(self.start_time_stamp, datetime): 
+                print(f"Bin {self.bin_id} TIMESTAMPS: {int(self.start_time_stamp)} ms - {int(self.end_time_stamp)} ms")
+                
+                MovingObjectGroup.BIN_TO_TIMESTAMP_MAP[self.bin_id] = {int(self.start_time_stamp), int(self.end_time_stamp)}
+            else:
+                print(f"Bin {self.bin_id} TIMESTAMPS: {self.start_time_stamp} - {self.end_time_stamp}")
+                
+                MovingObjectGroup.BIN_TO_TIMESTAMP_MAP[self.bin_id] = {self.start_time_stamp, self.end_time_stamp}
+                
             with MovingObjectGroup.bin_map_lock:
                 save_data_to_csv()
             
